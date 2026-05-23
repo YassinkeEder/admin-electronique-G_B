@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  web:
+    build:
+      context: ./project
+      dockerfile: Dockerfile
+    image: egovprojetgb/web:latest
+    ports:
+      - "80:80"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./project
+      dockerfile: server/Dockerfile
+    image: egovprojetgb/api:latest
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      ML_API_URL: ${ML_API_URL:-http://ml-api:8001}
+      ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:-http://localhost:5173}
+      NODE_ENV: production
+    restart: unless-stopped
+
+  ml-api:
+    build:
+      context: ./bi
+      dockerfile: Dockerfile
+    image: egovprojetgb/ml-api:latest
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      FRONTEND_URL: ${ALLOWED_ORIGIN:-http://localhost:5173}
+    restart: unless-stopped
+
+# Note: Database (Postgres / Supabase) is expected to be provided externally in production.
